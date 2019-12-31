@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Snake</title>
+</head>
+<h1>Snake Game JS</h1>
+<body>
+  
+  <canvas id="canvas" width="500" height="400"></canvas>
+  <script>
+    const fps = 60;
+    let tailleTete = 15;
+    let canvas, context;
+    //position de depart;
+    let teteX, teteY;
+
+  
+    canvas = document.getElementById("canvas");
+    context = canvas.getContext("2d");
+
+    //vitesse deplacement 
+    let vitesseX = 2;
+    let vitesseY = 2;
+    const vY = 2;
+    const vX = 2;
+    //position de depart
+
+    teteX = canvas.width/2;
+    teteY = canvas.height/2;
+
+    //Refresh the animation 
+    setInterval(update, 1000 / fps);
+
+    function update(){
+
+      //deplacement du serpent
+      teteX += vitesseX;
+      teteY += vitesseY;
+      tailleTete += 0.1;
+      //deplacement du serpent en fonction des fleches directionnelles
+      document.onkeydown = function(event){
+        if(event.keyCode == 37){
+          console.log("gauche");
+          gauche();
+        }
+        if(event.keyCode == 39){
+          console.log("droite");
+          droite();
+        }
+        if(event.keyCode == 38){
+          console.log("haut");
+          haut();
+        }
+        if(event.keyCode == 40){
+          console.log("bas");
+          bas();
+        }
+
+      }
+
+       //condition de defaite (touche un mur)
+       if(teteX - tailleTete/2 < 0 && vitesseX < 0){
+        alert("Tu as perdu");
+        reinitialisation();
+       
+      }else if(teteX + tailleTete/2 > canvas.width && vitesseX > 0){
+        alert("Tu as perdu");
+        reinitialisation();
+      }else if(teteY - tailleTete/2 < 0 && vitesseY < 0){
+        alert("Tu as perdu");
+        reinitialisation();
+      }else if(teteY + tailleTete/2 > canvas.height && vitesseY > 0){
+        alert("Tu as perdu");
+        reinitialisation();
+      }
+
+      
+      //drawing 
+      context.fillStyle = "black";
+      context.fillRect(0,0,canvas.width,canvas.height);
+      context.fillStyle = "red";
+      context.fillRect(teteX - tailleTete /2,teteY - tailleTete/2,tailleTete,tailleTete);
+
+      //drawing fruits
+      context.fillStyle= "green";
+      let positionFruitX;
+      let positionfruitY;
+      positionFruitX = (Math.random() * 25 + canvas.width/2) ;
+      positionfruitY = (Math.random()* 25 + canvas.height/2);
+      const tailleFruit = 10;
+      context.fillRect(positionFruitX,positionfruitY,tailleFruit,tailleFruit);
+    }
+
+    //fonctions de deplacement utilisées dans update()
+    function gauche(){
+      vitesseX = -vX;
+    }
+
+    function droite(){
+      vitesseX = vX;
+    }
+
+    function haut(){
+      vitesseY = -vY;
+    }
+
+    function bas(){
+      vitesseY = vY;
+    }
+
+    function reinitialisation(){
+      teteX = canvas.width/2;
+      teteY = canvas.height/2;
+      teteX += vitesseX;
+      teteY += vitesseY;
+      tailleTete = 15;
+      score = 0;
+    }
+
+    //score en fonction du temps
+    let score = 0;
+    function scoreByTime(){
+      score = score +1; 
+      document.getElementById("score").innerHTML = "Votre score est de " + score;
+      }
+    window.setInterval(scoreByTime, 1000)
+  </script>
+
+<div id="score"></div>
+</body>
+</html>
