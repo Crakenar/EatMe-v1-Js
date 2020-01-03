@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Snake</title>
 </head>
-<h1>Snake Game JS</h1>
+<h1>Snake Game Remastered JS</h1>
 <body>
   
   <canvas id="canvas" width="500" height="400"></canvas>
@@ -14,84 +14,93 @@
     const fps = 60;
     let tailleTete = 15;
     let canvas, context;
-    //position de depart;
-    let teteX, teteY;
 
-  
-    canvas = document.getElementById("canvas");
-    context = canvas.getContext("2d");
+    //variable fruits
+    let positionFruitX;
+    let positionFruitY;
+    const tailleFruit = 10;
+
+    //variables joueur
+    let teteX, teteY;
 
     //vitesse deplacement 
     let vitesseX = 2;
     let vitesseY = 2;
     const vY = 2;
     const vX = 2;
+    //score 
+    let score = 0;
+    const save_key_score = "highscore";
+    let highscore;
+    ///////////////////////////////////////////////
+    //////////////////////////////////////////////
+    //LES COORDONNEES DANS UN CANVAS NE SONT PAS CELLES D'UN GRAPHIQUE !!!
+    //(0,0) == angle en haut à gauche
+    //////////////////////////////////////////////
+    /////////////////////////////////////////////
+    //http://xymaths.free.fr/Informatique-Programmation/javascript/canvas-changement-coordonnees.php
+
+    canvas = document.getElementById("canvas");
+    context = canvas.getContext("2d");
+
     //position de depart
-
-    teteX = canvas.width/2;
-    teteY = canvas.height/2;
-
+    reinitialisation();
     //Refresh the animation 
     setInterval(update, 1000 / fps);
+    window.setInterval(scoreByTime, 1000)
 
     function update(){
-
       //deplacement du serpent
+      //gravite  vitesseY +=0.1;
       teteX += vitesseX;
       teteY += vitesseY;
-      tailleTete += 0.1;
+  
       //deplacement du serpent en fonction des fleches directionnelles
       document.onkeydown = function(event){
         if(event.keyCode == 37){
-          console.log("gauche");
           gauche();
         }
         if(event.keyCode == 39){
-          console.log("droite");
           droite();
         }
         if(event.keyCode == 38){
-          console.log("haut");
           haut();
         }
         if(event.keyCode == 40){
-          console.log("bas");
           bas();
         }
-
       }
 
        //condition de defaite (touche un mur)
-       if(teteX - tailleTete/2 < 0 && vitesseX < 0){
-        alert("Tu as perdu");
-        reinitialisation();
-       
-      }else if(teteX + tailleTete/2 > canvas.width && vitesseX > 0){
-        alert("Tu as perdu");
-        reinitialisation();
-      }else if(teteY - tailleTete/2 < 0 && vitesseY < 0){
-        alert("Tu as perdu");
-        reinitialisation();
-      }else if(teteY + tailleTete/2 > canvas.height && vitesseY > 0){
-        alert("Tu as perdu");
-        reinitialisation();
-      }
+      gameOverWall(teteX,teteY);
 
-      
+
+      //condition bonus points 
+      //hitbox entre tete et points green
+      //positionfruitX et positionfruitY = centre de la figure
+      //cote bas = positionFruitY + tailleFruit/2
+      //cote droite = positionFruitX - tailleFruit/2
+      //cote haut = positionFruitY - tailleFruit/2
+      //cote gauche = positionFruitX + tailleFruit/2
+      //manque de precision car il faut que l'entierete du cube rouge soit dans le fruit
+      if (positionFruitY + tailleFruit/2 > teteY - 10
+          && positionFruitY - tailleFruit / 2 < teteY - 10
+          && positionFruitX + tailleFruit/2 > teteX - 10
+          && positionFruitX - tailleFruit/2 < teteX- 10) {
+        console.log("mangé !");
+        score += 10;
+        generationCoordonneesFruits();
+        generationFruit(positionFruitX,positionFruitY);
+      }
+      //increaseDiffulculty(score);
       //drawing 
       context.fillStyle = "black";
       context.fillRect(0,0,canvas.width,canvas.height);
       context.fillStyle = "red";
       context.fillRect(teteX - tailleTete /2,teteY - tailleTete/2,tailleTete,tailleTete);
 
-      //drawing fruits
-      context.fillStyle= "green";
-      let positionFruitX;
-      let positionfruitY;
-      positionFruitX = (Math.random() * 25 + canvas.width/2) ;
-      positionfruitY = (Math.random()* 25 + canvas.height/2);
-      const tailleFruit = 10;
-      context.fillRect(positionFruitX,positionfruitY,tailleFruit,tailleFruit);
+      //generation de fruits (départ)
+      generationFruit(positionFruitX,positionFruitY); 
     }
 
     //fonctions de deplacement utilisées dans update()
@@ -111,24 +120,77 @@
       vitesseY = vY;
     }
 
-    function reinitialisation(){
+    function reinitialisation(){ 
       teteX = canvas.width/2;
       teteY = canvas.height/2;
+      vitesseX = 2;
+      vitesseY = 2;
       teteX += vitesseX;
       teteY += vitesseY;
       tailleTete = 15;
       score = 0;
+      generationCoordonneesFruits();
+
+      //get the highscore from local storage
+      if(localStorage.getItem(save_key_score) == null){
+        highscore =0;
+      }else{
+        highscore = localStorage.getItem(save_key_score);
+      }
+      
     }
 
     //score en fonction du temps
-    let score = 0;
-    function scoreByTime(){
-      score = score +1; 
-      document.getElementById("score").innerHTML = "Votre score est de " + score;
-      }
-    window.setInterval(scoreByTime, 1000)
+  function scoreByTime(){
+    score = score +1; 
+    document.getElementById("score").innerHTML = "Votre score est de " + score;
+    document.getElementById("highScore").innerHTML = "Votre record est de " + highscore;
+  }
+    
+  function generationFruit(positionFruitX,positionFruitY){
+    context.fillStyle= "green";  
+    context.fillRect(positionFruitX,positionFruitY,tailleFruit*2,tailleFruit*2);
+  }
+
+//savoir si nous avons touche un mur => gameOver
+  function gameOverWall(teteX,teteY){
+    if((teteX - tailleTete/2 < 0)
+        ||teteX + tailleTete/2 > canvas.width 
+        ||teteY - tailleTete/2 < 0
+        ||teteY + tailleTete/2 > canvas.height  ){
+        highscore = Math.max(score,highscore);
+        localStorage.setItem(save_key_score,highscore);
+        alert("Game Over");
+        reinitialisation();
+    }
+  }  
+  function generationCoordonneesFruits(){
+    let x = Math.round(Math.random() * canvas.width- tailleFruit*2);
+    let y = Math.round(Math.random() * canvas.height- tailleFruit*2);
+    positionFruitX = x;
+    positionFruitY = y;
+   /* if (positionFruitX < 0 || positionFruitX > canvas.width 
+        || positionFruitY < 0 || positionFruitY > canvas.height) {
+          positionFruitX = x;
+          positionFruitY = y;
+    }else{
+      generationCoordonneesFruits();
+    }*/
+
+ /* function increaseDiffulculty(score){
+    if(score > 50 && score < 100){
+      vitesseX = 2.3;
+      vitesseY = 2.3;
+    }else if(score > 100){
+      vitesseX = 2.6;
+      vitesseY = 2.6;
+    }
+  }*/
+
+  }
   </script>
 
 <div id="score"></div>
+<div id="highScore"></div>
 </body>
 </html>
