@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Snake</title>
 </head>
-<h1>Snake Game Remastered JS</h1>
+<h1>EatMe v1 JS</h1>
 <body>
   
   <canvas id="canvas" width="500" height="400"></canvas>
@@ -78,19 +78,22 @@
       //condition bonus points 
       //hitbox entre tete et points green
       //positionfruitX et positionfruitY = centre de la figure
-      //cote bas = positionFruitY + tailleFruit/2
-      //cote droite = positionFruitX - tailleFruit/2
-      //cote haut = positionFruitY - tailleFruit/2
-      //cote gauche = positionFruitX + tailleFruit/2
-      //manque de precision car il faut que l'entierete du cube rouge soit dans le fruit
-      if (positionFruitY + tailleFruit/2 > teteY - 10
-          && positionFruitY - tailleFruit / 2 < teteY - 10
-          && positionFruitX + tailleFruit/2 > teteX - 10
-          && positionFruitX - tailleFruit/2 < teteX- 10) {
-        console.log("mangé !");
-        score += 10;
-        generationCoordonneesFruits();
-        generationFruit(positionFruitX,positionFruitY);
+      //coin en haut gauche = x,y
+      //coin en haut droit = x+tailleFruit,y
+      //coin en bas gauche = x,y-tailleFruit
+      //coin en bas droit = x + tailleFruit,y-tailleFruit
+      //manque de precision car il faut que le cube rouge en entier soit dans le fruit  centre to centre
+      if ((positionFruitY + tailleFruit > teteY - 13
+          && positionFruitY - tailleFruit < teteY- 13)
+          &&(positionFruitX + tailleFruit > teteX- 13 
+          && positionFruitX - tailleFruit < teteX-13)) {
+          
+          console.log("mangé !");
+          console.log("Coordonnee fruits X" + positionFruitX + " Y " + positionFruitY);
+          console.log("Coordonnee serpent X" + teteX + " Y " + teteY);
+          score += 10;
+          generationCoordonneesFruits();
+          generationFruit(positionFruitX,positionFruitY);
       }
       //increaseDiffulculty(score);
       //drawing 
@@ -140,7 +143,7 @@
       
     }
 
-    //score en fonction du temps
+  //score en fonction du temps
   function scoreByTime(){
     score = score +1; 
     document.getElementById("score").innerHTML = "Votre score est de " + score;
@@ -153,6 +156,7 @@
   }
 
 //savoir si nous avons touche un mur => gameOver
+//Conservation du highscore
   function gameOverWall(teteX,teteY){
     if((teteX - tailleTete/2 < 0)
         ||teteX + tailleTete/2 > canvas.width 
@@ -165,8 +169,8 @@
     }
   }  
   function generationCoordonneesFruits(){
-    let x = Math.round(Math.random() * canvas.width- tailleFruit*2);
-    let y = Math.round(Math.random() * canvas.height- tailleFruit*2);
+    let x = Math.round(Math.random() * (canvas.width-tailleFruit-20));
+    let y = Math.round(Math.random() * (canvas.height-tailleFruit-20));
     positionFruitX = x;
     positionFruitY = y;
    /* if (positionFruitX < 0 || positionFruitX > canvas.width 
